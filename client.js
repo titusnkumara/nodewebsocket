@@ -28,7 +28,7 @@ client.on('connect', function(connection) {
 	    var speedObj = {"l":number1,"r":number2,"d":"f"};
             connection.sendUTF(JSON.stringify(speedObj));
 	    console.log(JSON.stringify(speedObj));
-            setTimeout(sendNumber, 100);
+            setTimeout(sendNumber, 1000);
 	
         }
     }
