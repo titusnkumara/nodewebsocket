@@ -23,9 +23,13 @@ client.on('connect', function(connection) {
     
     function sendNumber() {
         if (connection.connected) {
-            var number = Math.round(Math.random() * 0xFFFFFF);
-            connection.sendUTF(number.toString());
-            setTimeout(sendNumber, 1000);
+            var number1 = Math.round(Math.random() * 100);
+            var number2 = Math.round(Math.random()*100);
+	    var speedObj = {"l":number1,"r":number2,"d":"f"};
+            connection.sendUTF(JSON.stringify(speedObj));
+	    console.log(JSON.stringify(speedObj));
+            setTimeout(sendNumber, 100);
+	
         }
     }
     sendNumber();

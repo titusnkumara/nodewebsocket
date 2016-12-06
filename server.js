@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 var WebSocketServer = require('websocket').server;
 var http = require('http');
+
+var connection1;
+var connection2;
+
+var currentDataString = "";
  
 var server = http.createServer(function(request, response) {
     console.log((new Date()) + ' Received request for ' + request.url);
@@ -59,20 +64,25 @@ wsServer.on('request', function(request) {
       return;
     }
     
-    var connection = request.accept('echo-protocol', request.origin);
+    connection1 = request.accept('echo-protocol', request.origin);
     console.log((new Date()) + ' Connection accepted.');
-    connection.on('message', function(message) {
+    connection1.on('message', function(message) {
         if (message.type === 'utf8') {
-            console.log('Received Message: ' + message.utf8Data);
-            connection.sendUTF(message.utf8Data);
+            //console.log('Received Message: ' + message.utf8Data);
+            //connection.sendUTF(message.utf8Data);
+	    currentDataString = message.utf8Data;
+	    if(connection2){
+	    		connection2.sendUTF(currentDataString);
+		}
         }
+	/*
         else if (message.type === 'binary') {
             console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
             connection.sendBytes(message.binaryData);
-        }
+        }*/
     });
-    connection.on('close', function(reasonCode, description) {
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+    connection1.on('close', function(reasonCode, description) {
+        console.log((new Date()) + ' Peer ' + connection1.remoteAddress + ' disconnected.');
     });
 });
 
@@ -85,20 +95,21 @@ wsServer2.on('request', function(request) {
       return;
     }
 
-    var connection = request.accept('echo-protocol', request.origin);
+    connection2 = request.accept('echo-protocol',request.origin);
     console.log((new Date()) + ' Connection accepted.');
-    connection.on('message', function(message) {
-        if (message.type === 'utf8') {
+	
+    connection2.on('message', function(message) {
+       /* if (message.type === 'utf8') {
             console.log('Received Message: ' + message.utf8Data);
-            connection.sendUTF(message.utf8Data);
+            connection2.sendUTF(message.utf8Data);
         }
         else if (message.type === 'binary') {
             console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-            connection.sendBytes(message.binaryData);
-        }
+            connection2.sendBytes(message.binaryData);
+        }*/
     });
-    connection.on('close', function(reasonCode, description) {
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+    connection2.on('close', function(reasonCode, description) {
+        console.log((new Date()) + ' Peer ' + connection2.remoteAddress + ' disconnected.');
     });
 });
 

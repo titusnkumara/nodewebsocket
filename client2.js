@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+
+//This is the robot side client
+
 var WebSocketClient = require('websocket').client;
  
 var client = new WebSocketClient();
