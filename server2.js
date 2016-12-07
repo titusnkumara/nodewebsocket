@@ -2,8 +2,8 @@
 
 var WebSocketServer = require('ws').Server;
 
-var wss1 = new WebSocketServer({ port: 8080 });
-var wss2 = new WebSocketServer({ port: 8081 });
+var wss1 = new WebSocketServer({host:'0.0.0.0', port: 8080 });
+var wss2 = new WebSocketServer({host:'0.0.0.0', port: 8081 });
 
 var connection2;
  
