@@ -3,6 +3,7 @@ import RPi.GPIO as IO
 import time
 import ast
 import thread
+import sys
 
 ADDRESS = "ws://tesla.ce.pdn.ac.lk:8081"
 
@@ -12,7 +13,7 @@ IO.setmode (IO.BCM)
 leftForwardPIN = 19
 leftBackwordPIN = 26
 
-rightForwardPIN = 20
+rightForwardPIN = 16
 rightBackwordPIN = 21
 
 IO.setup(leftForwardPIN,IO.OUT)
@@ -20,10 +21,10 @@ IO.setup(leftBackwordPIN,IO.OUT)
 IO.setup(rightForwardPIN,IO.OUT)
 IO.setup(rightBackwordPIN,IO.OUT)
 
-leftForward = IO.PWM(leftForwardPIN,1000)
-leftBackword = IO.PWM(leftBackwordPIN,1000)
-rightForward = IO.PWM(rightForwardPIN,1000)
-rightBackword = IO.PWM(rightBackwordPIN,1000)
+leftForward = IO.PWM(leftForwardPIN,100)
+leftBackword = IO.PWM(leftBackwordPIN,100)
+rightForward = IO.PWM(rightForwardPIN,100)
+rightBackword = IO.PWM(rightBackwordPIN,100)
 
 
 leftForward.start(0)
@@ -91,6 +92,15 @@ def handleSpeed():
                 speedObj['r'] = MINVAL
             if(speedObj['l']<MINVAL):
                 speedObj['l'] = MINVAL
+        else:
+            #any other key combination, just reduce the speed
+            speedObj['r'] = speedObj['r']-(ACCELERATION/2)
+            speedObj['l'] = speedObj['l']-(ACCELERATION/2)
+            if(speedObj['r']<MINVAL):
+                speedObj['r'] = MINVAL
+            if(speedObj['l']<MINVAL):
+                speedObj['l'] = MINVAL
+
         if(dataObj['65']):
             #gear change allow only if in smaller speeds
             if(int(speedObj.get("l")) <10 and int(speedObj.get("r"))<10):
@@ -154,9 +164,11 @@ def on_message(ws, message):
 
 def on_error(ws, error):
     print error
+    sys.exit(0)
 
 def on_close(ws):
     print "### closed ###"
+    sys.exit(0)
 
 def on_open(ws):
     #for i in range(10):
@@ -168,13 +180,15 @@ def on_open(ws):
 
 if __name__ == "__main__":
     #create thread to handle speed
-    thread.start_new_thread( handleSpeed, () )
-    
-    websocket.enableTrace(True)
-    ws = websocket.WebSocketApp(ADDRESS,
-                              on_message = on_message,
-                              on_error = on_error,
-                              on_close = on_close)
-    ws.on_open = on_open
-    ws.run_forever()
-    
+    try:
+        thread.start_new_thread( handleSpeed, () )
+        
+        websocket.enableTrace(True)
+        ws = websocket.WebSocketApp(ADDRESS,
+                                  on_message = on_message,
+                                  on_error = on_error,
+                                  on_close = on_close)
+        ws.on_open = on_open
+        ws.run_forever()
+    except:
+        sys.exit(0)
